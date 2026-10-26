@@ -1,0 +1,4 @@
+
+## Controls enforced
+
+This module enforces six NIST SP 800-53 controls on every bucket it creates. **SC-12** (key establishment): it creates a dedicated Cloud KMS key ring and customer-managed key, so we own the key, not Google. **SC-13 / SC-28** (cryptographic protection at rest): the bucket's default encryption uses that CMEK, and the key rotates every 90 days. **AU-11** (record retention): a retention policy blocks early deletion, and a validation rule refuses prod buckets with under 365 days. **CM-6** (configuration settings): required labels (`project`, `environment`, `managed_by`, `compliance_scope`) and variable validation enforce a consistent baseline at plan time. **AC-3** (access enforcement): uniform bucket-level access and enforced public access prevention keep the bucket IAM-only and never public.
