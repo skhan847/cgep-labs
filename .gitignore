@@ -7,3 +7,4 @@ tfplan
 *.tfstate.backup
 tfplan
 moto_override.tf
+*.zip
