@@ -20,6 +20,13 @@ env:
 jobs:
   grc-gate:
     runs-on: ubuntu-latest
+    services:
+      moto:
+        image: motoserver/moto:latest
+        ports:
+          - 4566:5000
+        env:
+          MOTO_IAM_LOAD_MANAGED_POLICIES: "true"
     steps:
       - uses: actions/checkout@v4
 
@@ -32,9 +39,8 @@ jobs:
 
       - name: Start Moto (stand-in for AWS)
         run: |
-          pip install "moto[server]"
-          python -m moto.server -p 4566 > moto.log 2>&1 &
-          sleep 5
+          for i in $(seq 60); do curl -s http://127.0.0.1:4566/ >/dev/null && break; sleep 1; done
+          curl -sf http://127.0.0.1:4566/moto-api/ >/dev/null && echo "Moto is up"
           cat > /tmp/moto_override.tf <<'TF'
           provider "aws" {
             region                      = "us-east-1"
