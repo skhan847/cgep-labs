@@ -127,6 +127,11 @@ jobs:
         run: |
           VAULT_DIR=$(dirname "$(find terraform -path '*evidence-vault*' -name main.tf -not -path '*/.terraform/*' | head -1)")
           echo "Vault code: $VAULT_DIR"
+          if ! curl -s http://127.0.0.1:4566/ >/dev/null; then
+            echo "Moto was down, log:"; cat moto.log || true
+            nohup python -m moto.server -p 4566 > moto2.log 2>&1 &
+          fi
+          for i in $(seq 30); do curl -s http://127.0.0.1:4566/ >/dev/null && break; sleep 1; done
           cp /tmp/moto_override.tf "$VAULT_DIR/moto_override.tf"
           cd "$VAULT_DIR"
           export TF_VAR_project_name=cgep-lab TF_VAR_environment=dev
