@@ -12,6 +12,7 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
+  AWS_DEFAULT_REGION: us-east-1
   TF_WORKING_DIR: terraform/primitives/compliant-s3
   AWS_ACCESS_KEY_ID: test
   AWS_SECRET_ACCESS_KEY: test
@@ -34,7 +35,7 @@ jobs:
           pip install "moto[server]"
           python -m moto.server -p 4566 > moto.log 2>&1 &
           sleep 5
-          cat > "$TF_WORKING_DIR/moto_override.tf" <<'TF'
+          cat > /tmp/moto_override.tf <<'TF'
           provider "aws" {
             region                      = "us-east-1"
             access_key                  = "test"
@@ -48,9 +49,11 @@ jobs:
               sts = "http://127.0.0.1:4566"
               iam = "http://127.0.0.1:4566"
               kms = "http://127.0.0.1:4566"
+              sns = "http://127.0.0.1:4566"
             }
           }
           TF
+          cp /tmp/moto_override.tf "$TF_WORKING_DIR/moto_override.tf"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -68,6 +71,11 @@ jobs:
           curl -fsSL https://github.com/aquasecurity/tfsec/releases/download/v1.28.14/tfsec-linux-amd64 \
             -o /usr/local/bin/tfsec && chmod +x /usr/local/bin/tfsec
 
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3
+        with:
+          cosign-release: 'v2.2.4'
+
       - name: Terraform plan
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
@@ -79,6 +87,7 @@ jobs:
 
       - name: Conftest policy gate
         id: conftest
+        continue-on-error: true
         run: |
           mkdir -p evidence/lab-4-3
           EXIT=0
@@ -102,6 +111,7 @@ jobs:
       - name: tfsec scan
         id: tfsec
         if: always()
+        continue-on-error: true
         run: |
           tfsec "$TF_WORKING_DIR" --format sarif --out evidence/lab-4-3/tfsec.sarif || true
           tfsec "$TF_WORKING_DIR" --minimum-severity HIGH
@@ -112,10 +122,67 @@ jobs:
           cp "$TF_WORKING_DIR"/plan.json evidence/lab-4-3/plan.json
           cp "$TF_WORKING_DIR"/plan.txt  evidence/lab-4-3/plan.txt
 
+      - name: Build evidence vault in Moto
+        if: always()
+        run: |
+          VAULT_DIR=$(dirname "$(find terraform -path '*evidence-vault*' -name main.tf -not -path '*/.terraform/*' | head -1)")
+          echo "Vault code: $VAULT_DIR"
+          cp /tmp/moto_override.tf "$VAULT_DIR/moto_override.tf"
+          cd "$VAULT_DIR"
+          export TF_VAR_project_name=cgep-lab TF_VAR_environment=dev
+          terraform init -input=false
+          terraform apply -auto-approve -input=false
+          VAULT=$(aws --endpoint-url http://127.0.0.1:4566 s3api list-buckets \
+            --query "Buckets[?contains(Name,'evidence-vault')].Name | [0]" --output text)
+          echo "Vault bucket: $VAULT"
+          echo "VAULT=$VAULT" >> "$GITHUB_ENV"
+
+      - name: Bundle + sign + upload to vault
+        id: sign
+        if: always()
+        env:
+          AWS_ENDPOINT_URL: http://127.0.0.1:4566
+          RUN_ID: ${{ github.run_id }}
+          SHA: ${{ github.sha }}
+        run: |
+          mkdir -p evidence/lab-4-4
+          BUNDLE="evidence-${RUN_ID}-${SHA}.tar.gz"
+          tar -czf "$BUNDLE" evidence/lab-4-3
+          sha256sum "$BUNDLE" | awk '{print $1}' > "$BUNDLE.sha256"
+          cosign sign-blob --yes --bundle "$BUNDLE.sig.bundle" "$BUNDLE"
+          for f in "$BUNDLE" "$BUNDLE.sha256" "$BUNDLE.sig.bundle"; do
+            aws s3 cp "$f" "s3://$VAULT/runs/$RUN_ID/$f"
+          done
+          VERSION=$(aws s3api head-object --bucket "$VAULT" --key "runs/$RUN_ID/$BUNDLE" \
+            --query VersionId --output text)
+          cat > receipt.json <<JSON
+          {"run_id":"$RUN_ID","commit":"$SHA","bundle":"$BUNDLE","sha256":"$(cat $BUNDLE.sha256)","vault":"$VAULT","version_id":"$VERSION","signed_at":"$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
+          JSON
+          aws s3 cp receipt.json "s3://$VAULT/runs/$RUN_ID/receipt.json"
+          cp receipt.json evidence/lab-4-4/receipt.json
+          cat receipt.json
+
+      - name: Verify chain of custody
+        if: always()
+        env:
+          AWS_ENDPOINT_URL: http://127.0.0.1:4566
+        run: |
+          bash scripts/verify-evidence.sh "${{ github.run_id }}" --vault "$VAULT" 2>&1 \
+            | tee evidence/lab-4-4/verify.txt
+          exit ${PIPESTATUS[0]}
+
       - name: Upload evidence artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: grc-evidence-${{ github.run_id }}
-          path: evidence/lab-4-3/
+          path: |
+            evidence/lab-4-3/
+            evidence/lab-4-4/
           retention-days: 90
+
+      - name: Enforce gate
+        if: always()
+        run: |
+          test "${{ steps.conftest.outcome }}" = "success" \
+            && test "${{ steps.tfsec.outcome }}" = "success"
