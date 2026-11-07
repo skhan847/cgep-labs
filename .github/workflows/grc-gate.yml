@@ -131,9 +131,9 @@ jobs:
       - name: Build evidence vault in Moto
         if: always()
         run: |
-        if ! curl -s http://127.0.0.1:4566/ >/dev/null; then pip install -q "moto[server]"; MOTO_IAM_LOAD_MANAGED_POLICIES=true nohup python -m moto.server -p 4566 > moto.log 2>&1 & fi
-        for i in $(seq 1 30); do curl -s http://127.0.0.1:4566/ >/dev/null && break; sleep 1; done
-        echo "Moto is up"
+          if ! curl -s http://127.0.0.1:4566/ >/dev/null; then pip install -q "moto[server]"; MOTO_IAM_LOAD_MANAGED_POLICIES=true nohup python -m moto.server -p 4566 > moto.log 2>&1 & fi
+          for i in $(seq 1 30); do curl -s http://127.0.0.1:4566/ >/dev/null && break; sleep 1; done
+          echo "Moto is up"
           VAULT_DIR=$(dirname "$(find terraform -path '*evidence-vault*' -name main.tf -not -path '*/.terraform/*' | head -1)")
           echo "Vault code: $VAULT_DIR"
           if ! curl -s http://127.0.0.1:4566/ >/dev/null; then
