@@ -166,13 +166,13 @@ jobs:
           cosign sign-blob --yes --bundle "$BUNDLE.sig.bundle" "$BUNDLE"
           for f in "$BUNDLE" "$BUNDLE.sha256" "$BUNDLE.sig.bundle"; do
             aws s3 cp "$f" "s3://$VAULT/runs/$RUN_ID/$f" --checksum-algorithm SHA256
-          done
+          aws s3api put-object --bucket "$VAULT" --key "runs/$RUN_ID/$f" --body "$f" --checksum-algorithm SHA256
           VERSION=$(aws s3api head-object --bucket "$VAULT" --key "runs/$RUN_ID/$BUNDLE" \
             --query VersionId --output text)
           cat > receipt.json <<JSON
           {"run_id":"$RUN_ID","commit":"$SHA","bundle":"$BUNDLE","sha256":"$(cat $BUNDLE.sha256)","vault":"$VAULT","version_id":"$VERSION","signed_at":"$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
           JSON
-          aws s3 cp receipt.json "s3://$VAULT/runs/$RUN_ID/receipt.json" --checksum-algorithm SHA256
+          aws s3api put-object --bucket "$VAULT" --key "runs/$RUN_ID/receipt.json" --body receipt.json --checksum-algorithm SHA256
           cp receipt.json evidence/lab-4-4/receipt.json
           cat receipt.json
 
