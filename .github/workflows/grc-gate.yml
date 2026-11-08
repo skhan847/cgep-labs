@@ -166,7 +166,7 @@ jobs:
           cosign sign-blob --yes --bundle "$BUNDLE.sig.bundle" "$BUNDLE"
           for f in "$BUNDLE" "$BUNDLE.sha256" "$BUNDLE.sig.bundle"; do
     
-          aws s3api put-object --bucket "$VAULT" --key "runs/$RUN_ID/$f" --body "$f" --checksum-algorithm SHA256
+          aws s3api put-object --bucket "$VAULT" --key "runs/$RUN_ID/$f" --body "$f" --checksum-algorithm SHA256 --object-lock-mode GOVERNANCE --object-lock-retain-until-date "$(date -u -d '+1 day' +%Y-%m-%dT%H:%M:%SZ)"
           done
           VERSION=$(aws s3api head-object --bucket "$VAULT" --key "runs/$RUN_ID/$BUNDLE" \
             --query VersionId --output text)
