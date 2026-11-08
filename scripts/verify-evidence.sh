@@ -39,9 +39,8 @@ cosign verify-blob \
   "${BUNDLE}"
 
 # 3. Preservation
-RETAIN_UNTIL=$(aws $PROFILE_ARG s3api get-object-retention \
-  --bucket "${VAULT}" --key "${PREFIX}/${BUNDLE}" \
-  --query 'Retention.RetainUntilDate' --output text)
+RETAIN_UNTIL=$(aws $PROFILE_ARG s3api head-object --bucket "${VAULT}" --key "${PREFIX}/${BUNDLE}" --query 'ObjectLockRetainUntilDate' --output text)
+[[ "$RETAIN_UNTIL" == "None" || -z "$RETAIN_UNTIL" ]] && { echo "FAIL: no Object Lock on bundle"; exit 1; }
 NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 [[ "$RETAIN_UNTIL" > "$NOW" ]] || { echo "FAIL: retention expired"; exit 1; }
 
