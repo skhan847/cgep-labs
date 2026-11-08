@@ -1,0 +1,6 @@
+Completed 65 Bytes/108.8 KiB (2.5 KiB/s) with 4 file(s) remainingdownload: s3://cgep-lab-grc-evidence-vault-4dbb8fa9/runs/42440659071/evidence-42440659071-09b303535083c314a7f6b611a05dd86e650a7f09.tar.gz.sha256 to ./evidence-42440659071-09b303535083c314a7f6b611a05dd86e650a7f09.tar.gz.sha256
+Completed 65 Bytes/108.8 KiB (2.5 KiB/s) with 3 file(s) remainingCompleted 100.1 KiB/108.8 KiB (3.4 MiB/s) with 3 file(s) remainingdownload: s3://cgep-lab-grc-evidence-vault-4dbb8fa9/runs/42440659071/evidence-42440659071-09b303535083c314a7f6b611a05dd86e650a7f09.tar.gz to ./evidence-42440659071-09b303535083c314a7f6b611a05dd86e650a7f09.tar.gz
+Completed 100.1 KiB/108.8 KiB (3.4 MiB/s) with 2 file(s) remainingCompleted 108.5 KiB/108.8 KiB (3.4 MiB/s) with 2 file(s) remainingdownload: s3://cgep-lab-grc-evidence-vault-4dbb8fa9/runs/42440659071/evidence-42440659071-09b303535083c314a7f6b611a05dd86e650a7f09.tar.gz.sig.bundle to ./evidence-42440659071-09b303535083c314a7f6b611a05dd86e650a7f09.tar.gz.sig.bundle
+Completed 108.5 KiB/108.8 KiB (3.4 MiB/s) with 1 file(s) remainingCompleted 108.8 KiB/108.8 KiB (3.2 MiB/s) with 1 file(s) remainingdownload: s3://cgep-lab-grc-evidence-vault-4dbb8fa9/runs/42440659071/receipt.json to ./receipt.json
+Verified OK
+CHAIN INTACT for run 42440659071
