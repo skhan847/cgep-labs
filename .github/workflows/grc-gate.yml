@@ -165,8 +165,9 @@ jobs:
           sha256sum "$BUNDLE" | awk '{print $1}' > "$BUNDLE.sha256"
           cosign sign-blob --yes --bundle "$BUNDLE.sig.bundle" "$BUNDLE"
           for f in "$BUNDLE" "$BUNDLE.sha256" "$BUNDLE.sig.bundle"; do
-            aws s3 cp "$f" "s3://$VAULT/runs/$RUN_ID/$f" --checksum-algorithm SHA256
+    
           aws s3api put-object --bucket "$VAULT" --key "runs/$RUN_ID/$f" --body "$f" --checksum-algorithm SHA256
+          done
           VERSION=$(aws s3api head-object --bucket "$VAULT" --key "runs/$RUN_ID/$BUNDLE" \
             --query VersionId --output text)
           cat > receipt.json <<JSON
