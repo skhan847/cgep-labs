@@ -1,0 +1,4 @@
+attributeCondition: assertion.repository == "skhan847/cgep-labs"
+name: projects/604294034821/locations/global/workloadIdentityPools/github-actions/providers/github
+oidc:
+  issuerUri: https://token.actions.githubusercontent.com

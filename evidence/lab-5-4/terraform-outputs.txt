@@ -1,0 +1,2 @@
+wif_service_account_email = "cgep-grc-gate-sa@cgep-lab-12345.iam.gserviceaccount.com"
+workload_identity_provider = "projects/604294034821/locations/global/workloadIdentityPools/github-actions/providers/github"
