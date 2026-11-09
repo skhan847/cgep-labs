@@ -20,4 +20,4 @@ jobs:
 
       - run: gcloud auth list
 
-      - run: gcloud storage ls --project=cgep-lab-12345
+            - run: gcloud projects describe cgep-lab-12345
