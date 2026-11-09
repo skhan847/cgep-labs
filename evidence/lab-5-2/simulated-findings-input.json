@@ -1,0 +1,34 @@
+[
+  {
+    "SchemaVersion": "2018-10-08",
+    "Id": "cgep-sim/Config.1",
+    "ProductArn": "arn:aws:securityhub:us-east-1:123456789012:product/123456789012/default",
+    "GeneratorId": "security-control/Config.1",
+    "AwsAccountId": "123456789012",
+    "Types": ["Software and Configuration Checks/Industry and Regulatory Standards/NIST-800-53"],
+    "CreatedAt": "2026-11-09T06:00:00Z",
+    "UpdatedAt": "2026-11-09T06:00:00Z",
+    "Severity": { "Label": "CRITICAL" },
+    "Title": "AWS Config should be enabled and use the service-linked role for resource recording",
+    "Description": "SIMULATED on Moto. Config was left out of this lab, so the account reports its own gap.",
+    "Compliance": { "Status": "FAILED", "RelatedRequirements": ["NIST.800-53.r5 CM-3", "NIST.800-53.r5 CM-6(1)", "NIST.800-53.r5 CM-8"] },
+    "ProductFields": { "cgep:Simulated": "true", "cgep:Lab": "5.2" },
+    "Resources": [ { "Type": "AwsAccount", "Id": "AWS::::Account:123456789012", "Region": "us-east-1" } ]
+  },
+  {
+    "SchemaVersion": "2018-10-08",
+    "Id": "cgep-sim/CloudTrail.2",
+    "ProductArn": "arn:aws:securityhub:us-east-1:123456789012:product/123456789012/default",
+    "GeneratorId": "security-control/CloudTrail.2",
+    "AwsAccountId": "123456789012",
+    "Types": ["Software and Configuration Checks/Industry and Regulatory Standards/NIST-800-53"],
+    "CreatedAt": "2026-11-09T06:00:00Z",
+    "UpdatedAt": "2026-11-09T06:00:00Z",
+    "Severity": { "Label": "MEDIUM" },
+    "Title": "CloudTrail should have encryption at-rest enabled",
+    "Description": "SIMULATED on Moto. Trail cgep-lab-mgmt uses AES256 (SSE-S3), not a customer-managed KMS key.",
+    "Compliance": { "Status": "FAILED", "RelatedRequirements": ["NIST.800-53.r5 SC-28", "NIST.800-53.r5 AU-9"] },
+    "ProductFields": { "cgep:Simulated": "true", "cgep:Lab": "5.2" },
+    "Resources": [ { "Type": "AwsCloudTrailTrail", "Id": "arn:aws:cloudtrail:us-east-1:123456789012:trail/cgep-lab-mgmt", "Region": "us-east-1" } ]
+  }
+]
