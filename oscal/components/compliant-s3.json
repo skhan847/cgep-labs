@@ -1,0 +1,55 @@
+{
+  "component-definition": {
+    "uuid": "2696a6bc-a598-4597-81bf-da74bc2fd778",
+    "metadata": {
+      "title": "compliant-s3 module v1",
+      "last-modified": "2026-11-09T19:30:00+00:00",
+      "version": "1.0.0",
+      "oscal-version": "1.2.1",
+      "parties": [
+        {
+          "uuid": "54ee93a8-a72c-4247-bc25-6980d19c4acb",
+          "type": "organization",
+          "name": "Salmaan Khan"
+        }
+      ]
+    },
+    "components": [
+      {
+        "uuid": "b21173fc-224d-4a27-8b88-8203ffbce333",
+        "type": "software",
+        "title": "compliant-s3",
+        "description": "Reusable Terraform pattern for an AWS S3 primary bucket plus a dedicated access-log bucket. Hardcodes server-side encryption, versioning, public access block, access logging, and required compliance tags.",
+        "purpose": "Provide a compliant-by-default S3 primitive that any team can adopt with three lines of consumer Terraform.",
+        "responsible-roles": [
+          { "role-id": "provider", "party-uuids": ["54ee93a8-a72c-4247-bc25-6980d19c4acb"] }
+        ],
+        "control-implementations": [
+          {
+            "uuid": "1e040cb5-74fc-4380-a08d-9fcaf93056e8",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+            "description": "Implementation of NIST 800-53 Rev 5 controls satisfied by this module.",
+            "implemented-requirements": [
+              {
+                "uuid": "ac12c2c5-48f3-4fea-b5e8-5f752a45a076",
+                "control-id": "sc-28",
+                "description": "The primary bucket is encrypted at rest with SSE-KMS using a customer-managed KMS key (aws_kms_key.bucket) with automatic key rotation enabled. Encryption is hardcoded in the module, so consumers cannot disable it or switch to a weaker setting. The access-log bucket uses S3-managed encryption (SSE-S3), because S3 server access logs cannot be delivered to a KMS-encrypted bucket.",
+                "props": [
+                  { "name": "implementation-status", "value": "implemented" },
+                  { "name": "terraform-resource", "value": "aws_s3_bucket_server_side_encryption_configuration.primary" }
+                ],
+                "links": [
+                  {
+                    "rel": "evidence",
+                    "href": "s3://EVIDENCE_VAULT/runs/LATEST/evidence-LATEST.tar.gz → https://github.com/skhan847/cgep-labs/tree/main/evidence/lab-4-4",
+                    "text": "Signed pipeline bundle containing terraform plan.json."
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

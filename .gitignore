@@ -8,3 +8,4 @@ tfplan
 tfplan
 moto_override.tf
 *.zip
+.trestle-work/
